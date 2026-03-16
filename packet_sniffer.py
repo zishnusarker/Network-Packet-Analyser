@@ -123,20 +123,26 @@ BPF FILTER EXAMPLES:
 
 
 def check_root():
-    """
-    Check if running with root/sudo privileges.
-    
-    WHY ROOT IS REQUIRED:
+    """Check if running with root/admin privileges.
+
     Packet capture requires access to raw sockets, which is a privileged
-    operation. This is a security feature of the OS — you don't want
-    any unprivileged process to be able to sniff network traffic.
-    
-    On Linux: uid 0 = root
-    Alternative: Use Linux capabilities (CAP_NET_RAW) instead of full root
+    operation. This helper is used to warn users when the script is not
+    running with the necessary permissions.
+
+    On POSIX, we check for UID 0. On Windows, we attempt to detect
+    if the process is running with administrator privileges.
     """
-    if os.geteuid() != 0:
+    # POSIX (Linux/macOS) has os.geteuid
+    if hasattr(os, "geteuid"):
+        return os.geteuid() == 0
+
+    # Windows: check for administrator before trying to use raw sockets
+    try:
+        import ctypes
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
+    except Exception:
+        # If we cannot determine, assume non-admin and warn the user
         return False
-    return True
 
 
 def setup_signal_handlers(engine):
