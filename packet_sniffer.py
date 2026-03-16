@@ -45,7 +45,7 @@ from modules.capture import PacketCaptureEngine
 def parse_arguments():
     """
     Parse command-line arguments using argparse.
-    
+
     argparse is Python's standard library for building CLI tools.
     In cybersecurity, most professional tools are CLI-based because:
     - They can be scripted and automated
@@ -55,7 +55,7 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(
         description="Network Packet Analyzer & Sniffer - "
-                    "Capture and analyze network traffic with threat detection",
+        "Capture and analyze network traffic with threat detection",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 EXAMPLES:
@@ -73,52 +73,51 @@ BPF FILTER EXAMPLES:
   "tcp port 80 or port 443" - HTTP and HTTPS
   "not arp"                - Everything except ARP
   "src net 192.168.1.0/24" - Traffic from specific subnet
-        """
+        """,
     )
-    
+
     parser.add_argument(
-        '-i', '--interface',
-        help='Network interface to capture on (default: auto-detect)',
-        default=None
+        "-i",
+        "--interface",
+        help="Network interface to capture on (default: auto-detect)",
+        default=None,
     )
-    
+
     parser.add_argument(
-        '-f', '--filter',
-        help='BPF (Berkeley Packet Filter) expression',
-        default=None
+        "-f", "--filter", help="BPF (Berkeley Packet Filter) expression", default=None
     )
-    
+
     parser.add_argument(
-        '-c', '--count',
-        help='Number of packets to capture (0 = unlimited)',
+        "-c",
+        "--count",
+        help="Number of packets to capture (0 = unlimited)",
         type=int,
-        default=0
+        default=0,
     )
-    
+
     parser.add_argument(
-        '-o', '--output',
-        help='Save captured packets to PCAP file',
-        default=None
+        "-o", "--output", help="Save captured packets to PCAP file", default=None
     )
-    
+
     parser.add_argument(
-        '-v', '--verbose',
-        help='Show detailed packet information (TTL, payload preview)',
-        action='store_true'
+        "-v",
+        "--verbose",
+        help="Show detailed packet information (TTL, payload preview)",
+        action="store_true",
     )
-    
+
     parser.add_argument(
-        '--list-interfaces',
-        help='List available network interfaces and exit',
-        action='store_true'
+        "--list-interfaces",
+        help="List available network interfaces and exit",
+        action="store_true",
     )
-    
+
     parser.add_argument(
-        '--config',
-        help='Path to configuration file (default: config.yaml)',
-        default='config.yaml'
+        "--config",
+        help="Path to configuration file (default: config.yaml)",
+        default="config.yaml",
     )
-    
+
     return parser.parse_args()
 
 
@@ -139,6 +138,7 @@ def check_root():
     # Windows: check for administrator before trying to use raw sockets
     try:
         import ctypes
+
         return ctypes.windll.shell32.IsUserAnAdmin() != 0
     except Exception:
         # If we cannot determine, assume non-admin and warn the user
@@ -148,25 +148,26 @@ def check_root():
 def setup_signal_handlers(engine):
     """
     Set up graceful shutdown on SIGINT (Ctrl+C) and SIGTERM.
-    
+
     Signal handling ensures:
     1. PCAP file is properly saved
     2. Final statistics are displayed
     3. Log files are properly closed
     4. No data corruption from abrupt termination
     """
+
     def signal_handler(signum, frame):
         print(f"\n{Colors.YELLOW}[*] Signal received. Shutting down...{Colors.RESET}")
         engine.stop()
         sys.exit(0)
-    
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 
 
 def ensure_directories():
     """Create necessary directories if they don't exist."""
-    dirs = ['logs', 'captures']
+    dirs = ["logs", "captures"]
     for d in dirs:
         os.makedirs(d, exist_ok=True)
 
@@ -174,7 +175,7 @@ def ensure_directories():
 def main():
     """
     Main entry point.
-    
+
     Pipeline:
     1. Parse CLI arguments
     2. Load configuration
@@ -185,35 +186,41 @@ def main():
     """
     # Parse command-line arguments
     args = parse_arguments()
-    
+
     # Handle --list-interfaces (doesn't require root)
     if args.list_interfaces:
         PacketCaptureEngine.list_interfaces()
         sys.exit(0)
-    
+
     # Display banner
     print_banner()
-    
+
     # Create necessary directories
     ensure_directories()
-    
+
     # Load configuration
     config = load_config(args.config)
     print(f"{Colors.GREEN}[✓] Configuration loaded from {args.config}{Colors.RESET}")
-    
+
     # Check root privileges
     if not check_root():
-        print(f"{Colors.YELLOW}[!] WARNING: Not running as root. "
-              f"Packet capture may fail.{Colors.RESET}")
-        print(f"{Colors.YELLOW}    Run with: sudo python3 packet_sniffer.py{Colors.RESET}")
-        print(f"{Colors.YELLOW}    Continuing anyway (some features may be limited)...{Colors.RESET}\n")
-    
+        print(
+            f"{Colors.YELLOW}[!] WARNING: Not running as root. "
+            f"Packet capture may fail.{Colors.RESET}"
+        )
+        print(
+            f"{Colors.YELLOW}    Run with: sudo python3 packet_sniffer.py{Colors.RESET}"
+        )
+        print(
+            f"{Colors.YELLOW}    Continuing anyway (some features may be limited)...{Colors.RESET}\n"
+        )
+
     # Create output directory for PCAP if needed
     if args.output:
         output_dir = os.path.dirname(args.output)
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
-    
+
     # Initialize the capture engine
     engine = PacketCaptureEngine(
         config=config,
@@ -221,17 +228,19 @@ def main():
         bpf_filter=args.filter,
         packet_count=args.count,
         output_file=args.output,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
-    
+
     # Set up graceful shutdown handlers
     setup_signal_handlers(engine)
-    
+
     # Start capture
     print(f"{Colors.GREEN}[✓] Capture engine initialized{Colors.RESET}")
-    print(f"{Colors.GREEN}[✓] Threat detection engine loaded "
-          f"(7 detection modules active){Colors.RESET}\n")
-    
+    print(
+        f"{Colors.GREEN}[✓] Threat detection engine loaded "
+        f"(7 detection modules active){Colors.RESET}\n"
+    )
+
     try:
         engine.start()
     except KeyboardInterrupt:
