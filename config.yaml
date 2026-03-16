@@ -1,0 +1,86 @@
+# ============================================================
+# Network Packet Analyzer & Sniffer - Configuration
+# ============================================================
+# This file controls detection thresholds, logging behavior,
+# and capture settings. Tune these values based on your
+# network environment.
+
+# --- Capture Settings ---
+capture:
+  interface: null          # null = auto-detect default interface
+  promiscuous: true        # Capture all traffic on segment, not just traffic destined for this host
+  packet_count: 0          # 0 = unlimited capture
+  bpf_filter: null         # Berkeley Packet Filter (e.g., "tcp port 80")
+  snap_length: 65535       # Max bytes to capture per packet (65535 = full packet)
+
+# --- Detection Engine Thresholds ---
+# These thresholds control when alerts are triggered.
+# Lower values = more sensitive (more false positives)
+# Higher values = less sensitive (may miss real attacks)
+detection:
+  # Port Scan Detection
+  port_scan:
+    enabled: true
+    threshold: 15           # Number of unique ports from one source before alerting
+    time_window: 30         # Time window in seconds to track port access
+    syn_scan_detect: true   # Detect half-open SYN scans specifically
+
+  # ARP Spoofing Detection
+  arp_spoof:
+    enabled: true
+    # Trusted ARP mappings (optional) - add your gateway here
+    # If a device claims one of these IPs with a different MAC, instant alert
+    trusted_mappings: {}
+      # 192.168.1.1: "aa:bb:cc:dd:ee:ff"   # Example: your gateway
+
+  # DNS Analysis
+  dns_analysis:
+    enabled: true
+    tunnel_detection: true
+    max_subdomain_length: 50          # Subdomains longer than this are suspicious
+    query_volume_threshold: 50         # Queries from one source in time window
+    query_volume_window: 60            # Time window in seconds
+    entropy_threshold: 3.5             # Shannon entropy above this = possible DGA domain
+
+  # Brute Force Detection
+  brute_force:
+    enabled: true
+    threshold: 10                      # Connection attempts before alert
+    time_window: 60                    # Time window in seconds
+    monitored_ports: [22, 23, 3389, 21, 3306, 5432]  # SSH, Telnet, RDP, FTP, MySQL, PostgreSQL
+
+  # Data Exfiltration Detection
+  data_exfiltration:
+    enabled: true
+    threshold_bytes: 10485760          # 10 MB - alert if single connection sends more
+    time_window: 300                   # Time window in seconds (5 minutes)
+
+  # ICMP Anomaly Detection
+  icmp_anomaly:
+    enabled: true
+    flood_threshold: 100               # ICMP packets from one source in time window
+    flood_window: 10                   # Time window in seconds
+    max_packet_size: 1000              # Bytes - ICMP packets larger than this are suspicious
+
+# --- Logging Settings ---
+logging:
+  log_directory: "logs"
+  log_level: "INFO"                    # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_to_file: true
+  log_to_console: true
+  alert_log_file: "logs/alerts.json"   # JSON-structured alert log
+  event_log_file: "logs/events.log"    # General event log
+
+# --- Output Settings ---
+output:
+  save_pcap: false                     # Save captured packets to PCAP file
+  pcap_directory: "captures"
+  show_payload: false                  # Display packet payload in output
+  max_payload_display: 256             # Max bytes of payload to display
+  colorized: true                      # Use colored terminal output
+
+# --- Statistics ---
+stats:
+  display_interval: 30                 # Show stats summary every N seconds
+  track_top_talkers: true              # Track most active source/destination IPs
+  top_talkers_count: 10                # Number of top talkers to track
