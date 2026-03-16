@@ -308,5 +308,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## Author
 
-**[Your Name]** — Cybersecurity Portfolio Project  
-Built as part of a hands-on cybersecurity learning path covering network security, threat detection, and traffic analysis.
+**Zishnendu Sarker** - Built as part of a hands-on cybersecurity learning path covering network security, threat detection, and traffic analysis.
