@@ -306,6 +306,3 @@ This project is licensed under the MIT License, see the [LICENSE](LICENSE) file 
 
 ---
 
-## Author
-
-**Zishnendu Sarker** - Built as part of a hands-on cybersecurity learning path covering network security, threat detection, and traffic analysis.
