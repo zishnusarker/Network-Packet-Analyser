@@ -178,7 +178,7 @@ Identifies when a single source IP probes multiple ports on a target within a ti
 Maintains an ARP table and alerts when a MAC address is seen claiming multiple IP addresses, or when an IP-to-MAC mapping changes unexpectedly.
 
 ### 3. DNS Tunneling Detection
-Flags DNS queries with abnormally long subdomain labels or unusually high query volumes from a single source — indicators of data exfiltration through DNS.
+Flags DNS queries with abnormally long subdomain labels or unusually high query volumes from a single source - indicators of data exfiltration through DNS.
 
 ### 4. DGA Domain Detection
 Uses entropy analysis to detect randomly generated domain names, which are commonly used by malware to contact command-and-control (C2) servers.
